@@ -72,7 +72,7 @@ class ProductController extends Controller
      */
     public function destroy(Product $produit)
     {
-        
+
     }
 
     public function checkLowStock(){
