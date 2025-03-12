@@ -4,29 +4,29 @@ namespace App\Notifications;
 
 use App\Models\Product;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class LowStockNotification extends Notification
 {
     use Queueable;
 
-    public function __construct(private Product $product)
+    public function __construct(public Product $product)
     {
-        $this->product = $product;
     }
 
-    public function via(): array
+    public function via($notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail(): MailMessage
+    public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Critical Stock Alert')
+            ->subject('Low Stock Alert')
             ->line("Product {$this->product->name} is running low on stock!")
             ->line("Current stock level: {$this->product->stock}")
-            ->action('View Product', url("/api/v1/admin/products/{$this->product->id}"));
+            ->action('View Product', url("/admin/products/{$this->product->id}"))
+            ->line('Please restock soon!');
     }
 }

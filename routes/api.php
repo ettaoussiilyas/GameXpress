@@ -41,17 +41,8 @@ Route::prefix('v1')->group(function () {
             // User Routes
             Route::apiResource('users', UserController::class);
 
-            Route::get('/test-mail', function() {
-                $product = Product::first();
-                $user = User::role('super_admin')->first();
+            Route::get('/checkstock', [ProductController::class, 'checkLowStock'])->middleware('auth:sanctum');
 
-                if (!$product || !$user) {
-                    return 'Please ensure you have products and super_admin users in database';
-                }
-
-                $user->notify(new LowStockNotification($product));
-                return 'Test mail sent to Mailtrap!';
-            });
 
         });
     });

@@ -4,16 +4,18 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Notifications\LowStockNotification;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:view products')->only('index', 'show');
-        $this->middleware('permission:create products')->only('create', 'store');
-        $this->middleware('permission:edit products')->only('edit', 'update');
-        $this->middleware('permission:delete products')->only('destroy');
+//        $this->middleware('permission:view products')->only('index', 'show');
+//        $this->middleware('permission:create products')->only('create', 'store');
+//        $this->middleware('permission:edit products')->only('edit', 'update');
+//        $this->middleware('permission:delete products')->only('destroy');
     }
 
 
@@ -72,4 +74,25 @@ class ProductController extends Controller
     {
         //
     }
+
+    public function checkLowStock(){
+
+        $lowStockProducts = Product::where('stock', '<=', 10)->get();
+        $admins = User::role('super_admin')->get();
+//        $admins = User::role(['super_admin', 'product_manager'])->get();
+
+//        $admins = User::whereHas('roles', function ($query) {
+//            $query->where('name', [
+//                'super_admin',
+//                'product_manager'
+//            ]);
+//        })->get();
+
+        foreach ($lowStockProducts as $product) {
+            foreach ($admins as $admin) {
+                $admin->notify(new LowStockNotification($product));
+            }
+        }
+    }
+
 }

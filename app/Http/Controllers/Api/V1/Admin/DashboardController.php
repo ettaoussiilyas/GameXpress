@@ -20,6 +20,17 @@ class DashboardController extends Controller
                 'Error' => 'Unauthorized Sir Akhuya F7alk'
             ]);
         }
+//        start
+        $lowStockProducts = Product::where('stock', '<=', 10)->get();
+        $admins = User::role('super_admin')->get();
+
+        foreach ($lowStockProducts as $product) {
+            foreach ($admins as $admin) {
+                $admin->notify(new LowStockNotification($product));
+            }
+        }
+//        end
+
         return response()->json([
             'Success' => 'Welcome to Dashboard'
         ]);
