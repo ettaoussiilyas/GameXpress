@@ -7,6 +7,9 @@ use App\Http\Controllers\Api\V1\Admin\UserController;
 use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use App\Http\Controllers\Api\V1\Admin\CategorieController;
 use App\Http\Controllers\Api\V1\Admin\ProductController;
+use App\Models\Product;
+use App\Models\User;
+use App\Notifications\LowStockNotification;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -38,8 +41,18 @@ Route::prefix('v1')->group(function () {
             // User Routes
             Route::apiResource('users', UserController::class);
 
+            Route::get('/test-mail', function() {
+                $product = Product::first();
+                $user = User::role('super_admin')->first();
 
-            // Other protected routes go here
+                if (!$product || !$user) {
+                    return 'Please ensure you have products and super_admin users in database';
+                }
+
+                $user->notify(new LowStockNotification($product));
+                return 'Test mail sent to Mailtrap!';
+            });
+
         });
     });
 });
