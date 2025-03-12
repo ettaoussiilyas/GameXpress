@@ -24,9 +24,9 @@ class LowStockNotification extends Notification
     {
         return (new MailMessage)
             ->subject('Low Stock Alert')
-            ->line("Product {$this->product->name} is running low on stock!")
+            ->line("ProductSeeder {$this->product->name} is running low on stock!")
             ->line("Current stock level: {$this->product->stock}")
-            ->action('View Product', url("/admin/products/{$this->product->id}"))
+            ->action('View ProductSeeder', url("/admin/products/{$this->product->id}"))
             ->line('Please restock soon!');
     }
 }

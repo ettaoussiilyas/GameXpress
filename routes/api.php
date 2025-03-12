@@ -32,7 +32,7 @@ Route::prefix('v1')->group(function () {
             // Dashboard Routes
             Route::get('dashboard', [DashboardController::class, 'index']);
 
-            // Product Routes
+            // ProductSeeder Routes
             Route::apiResource('products', ProductController::class);
 
             // Category Routes
@@ -43,7 +43,11 @@ Route::prefix('v1')->group(function () {
 
             Route::get('/checkstock', [ProductController::class, 'checkLowStock'])->middleware('auth:sanctum');
 
-
+            Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+            Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+            Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+            Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+            Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');;
         });
     });
 });
