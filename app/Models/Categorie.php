@@ -8,7 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Product;
 class Categorie extends Model
 {
-    public function product(){
+
+    protected $table = 'categories';
+
+    protected $fillable = [
+        'name',
+        'slug',
+    ];
+
+    public function products(){
+
         return $this->hasMany(Product::class);
     }
 }

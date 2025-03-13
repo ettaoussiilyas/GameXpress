@@ -43,11 +43,16 @@ Route::prefix('v1')->group(function () {
 
             Route::get('/checkstock', [ProductController::class, 'checkLowStock'])->middleware('auth:sanctum');
 
+            // Product Routers
             Route::get('/products', [ProductController::class, 'index'])->name('products.index');
             Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-            Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+            Route::get('/products/{product}', [ProductController::class, 'show'])->where('product', '[0-9]+')->name('products.show');
             Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-            Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');;
+            Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+            // Category Routes
+//            Route::get('/categories/{category}', [CategorieController::class, 'show'])->name('categories.show');
+
         });
     });
 });
