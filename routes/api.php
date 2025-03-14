@@ -3,56 +3,48 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Admin\AuthController;
-use App\Http\Controllers\Api\V1\Admin\UserController;
+use App\Http\Controllers\Api\V1\Admin\CategoryController;
 use App\Http\Controllers\Api\V1\Admin\DashboardController;
-use App\Http\Controllers\Api\V1\Admin\CategorieController;
 use App\Http\Controllers\Api\V1\Admin\ProductController;
-use App\Models\Product;
-use App\Models\User;
-use App\Notifications\LowStockNotification;
+use App\Http\Controllers\Api\V1\Admin\UserController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::get('/user', function (Request $request) {
+//         return $request->user();
+//     });
+// });
 
-
-// Public routes
 Route::prefix('v1')->group(function () {
-    Route::prefix('admin')->group(function () {
-
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/login', [AuthController::class, 'login']);
-
-        // Protected routes
-        Route::middleware('auth:sanctum')->group(function () {
-
-            Route::post('/logout', [AuthController::class, 'logout']);
-            Route::get('/me', [AuthController::class, 'me']);
-
-            // Dashboard Routes
-            Route::get('dashboard', [DashboardController::class, 'index']);
-
-            // ProductSeeder Routes
-            Route::apiResource('products', ProductController::class);
-
-            // Category Routes
-            Route::apiResource('categories', CategorieController::class);
-
-            // User Routes
-            Route::apiResource('users', UserController::class);
-
-            Route::get('/checkstock', [ProductController::class, 'checkLowStock'])->middleware('auth:sanctum');
-
-            // Product Routers
-            Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-            Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-            Route::get('/products/{product}', [ProductController::class, 'show'])->where('product', '[0-9]+')->name('products.show');
-            Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-            Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-
-            // Category Routes
-//            Route::get('/categories/{category}', [CategorieController::class, 'show'])->name('categories.show');
-
-        });
+    Route::post('admin/register', [AuthController::class, 'register']);
+    Route::post('admin/login', [AuthController::class, 'login']);
+    // Route::get('admin/permissions', [ProductController::class, 'permissions']);
+    
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('admin/logout', [AuthController::class, 'logout']);
+        Route::get('admin/dashboard', [DashboardController::class, 'index']);
+       
+        // Products Routes
+        Route::get('admin/products', [ProductController::class, 'index']);
+        Route::get('admin/products/{id}', [ProductController::class, 'show']);
+        Route::post('admin/products', [ProductController::class, 'store']);
+        Route::put('admin/products/{id}', [ProductController::class, 'update']);
+        Route::delete('admin/products/{id}', [ProductController::class, 'destroy']);
+       
+        // Categories Routes
+        Route::get('admin/categories', [CategoryController::class, 'index']);
+        Route::get('admin/categories/{id}', [CategoryController::class, 'show']);
+        Route::post('admin/categories', [CategoryController::class, 'store']);
+        Route::put('admin/categories/{id}', [CategoryController::class, 'update']);
+        Route::delete('admin/categories/{id}', [CategoryController::class, 'destroy']);
+        
+        // Users Routes
+        Route::get('admin/users', [UserController::class, 'index']);
+        Route::get('admin/users/{id}', [UserController::class, 'show']);
+        Route::post('admin/users', [UserController::class, 'store']);
+        Route::put('admin/users/{id}', [UserController::class, 'update']);
+        Route::delete('admin/users/{id}', [UserController::class, 'destroy']);
+        
     });
 });
+
+

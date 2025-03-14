@@ -2,46 +2,48 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Controllers\Api\V1\Admin\Controller;
+use App\Notifications\StockLowNotification;
 use Illuminate\Http\Request;
+use App\Models\User; // ou Admin si vous avez un modèle spécifique
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name' => 'required|string',
+            'email' => 'required|string|email|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:super_admin,user_manager,product_manager'
-
+            'role' => 'required|string|exists:roles,name'
         ]);
-
-
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-        ]);
+            ]);
+        $user->assignRole($request->role);
 
-        if('name' == 'ilyas'){
-            $user->assignRole('super_admin');
-        }else{
-            $user->assignRole($request->role);
-        }
+        $token = $user->createToken('api-token')->plainTextToken;
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // if (!$user->hasRole($request->role)) {
+        //     return response()->json([
+        //         'error' => "Le rôle {$request->role} n'a pas été assigné",
+        //         'user_roles' => $user->roles->pluck('name'),
+        //     ], 400);
+        // }
+        // $user->notify(new StockLowNotification($product));
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'User registered successfully',
-            'user' => $user,
-            'token' => $token
-        ], 201);
+    'message' => 'Utilisateur enregistré avec succès',
+    'token' => $token,
+    'role' => $user->roles->first()->name,
+    'permissions' => $user->getAllPermissions()->pluck('name'),
+], 201);
     }
 
     public function login(Request $request)
@@ -53,37 +55,30 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'email' => ['Les identifiants fournis sont incorrects.'],
             ]);
         }
 
-        $token = $user->createToken('auth_token', ['product:create', 'product:update'])->plainTextToken;
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        $permissions = $user->getAllPermissions();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Login successful',
-            'user' => $user,
-            'token' => $token
+            'message' => 'Connexion réussie',
+            'token' => $token,
+            // 'role' => $user->role->name,
+            'permissions' => $permissions,
         ]);
     }
-
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        // Révoquer tous les tokens de l'utilisateur connecté
+        $request->user()->tokens()->delete();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Successfully logged out'
-        ]);
-    }
-
-    public function me(Request $request)
-    {
-        return response()->json([
-            'status' => 'success',
-            'user' => $request->user()
+            'message' => 'Déconnexion réussie',
         ]);
     }
 }

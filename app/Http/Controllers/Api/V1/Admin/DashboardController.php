@@ -2,55 +2,23 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class DashboardController extends Controller
+class DashboardController
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        if(!$request->user()->can('view dashboard')){
-
+        if (!$request->user()->can('view_dashboard')) {
             return response()->json([
-                'Error' => 'Unauthorized Sir Akhuya F7alk'
+                'message' => 'You do not have permission to view the dashboard',
             ]);
         }
-//        start
-        $lowStockProducts = Product::where('stock', '<=', 10)->get();
-        $admins = User::role('super_admin')->get();
-
-        foreach ($lowStockProducts as $product) {
-            foreach ($admins as $admin) {
-                $admin->notify(new LowStockNotification($product));
-            }
+        else {
+            return response()->json([
+                'total_products' => 100,
+                'total_users' => 50,
+                'total_orders' => 30,
+            ]);
         }
-//        end
-
-        return response()->json([
-            'Success' => 'Welcome to Dashboard'
-        ]);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-
 }
